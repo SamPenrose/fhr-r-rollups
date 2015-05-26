@@ -1,0 +1,7 @@
+Package: fhr.r.rollups
+Title: Create Summaries From 1% Sample Of The FHR Data
+Version: 0.1
+Description: Cleans and assembles Mozilla Firefox Health Report data.
+Depends: R (>= 3.1.0)
+License: Mozilla Public License 2.0
+Suggests: testthat

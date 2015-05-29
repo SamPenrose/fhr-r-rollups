@@ -1,0 +1,16 @@
+{
+  "2015-01-01": {
+      "org.mozilla.appSessions.previous": {
+	  "cleanTotalTime": [100, 200, 300, 400],
+	  "abortedTotalTime": [60],
+	  "cleanActiveTicks": [10, 20, 30, 40],
+	  "abortedActiveTicks": [6]
+      }
+  },
+  "2015-01-02": {
+      "org.mozilla.appSessions.previous": {
+	  "cleanTotalTime": [100],
+	  "cleanActiveTicks": [10]
+      }
+  }
+}

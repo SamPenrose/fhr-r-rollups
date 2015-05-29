@@ -1,7 +1,22 @@
 source("../../lib/activity.R")
+library(rjson)
 
 test_that("allActivity works", {
-    expect_equal(allActivity(NULL), NULL)
+    ## Simple garbage values.
+    days = fromJSON("{}")
+    expect_equal(allActivity(days), NULL)
+    days = fromJSON('{"2015-01-01":null}')
+    expect_equal(allActivity(days), NULL)
+    days = fromJSON('{"2015-01-01":{"org.mozilla.appSessions.previous":null}}')
+    expect_equal(allActivity(days), NULL)
+
+    ## Simple correct values.
+    days = fromJSON(file="data/valid_activity.json")
+    result = list("2015-01-01"=list(totalsec = c(100, 200, 300, 400, 60),
+                                    activesec = c(50, 100, 150, 200, 30)),
+		  "2015-01-02"=list(totalsec = 100, activesec = 50))
+    expect_equal(allActivity(days), result)
+
 })
 
 ## Add Date objects

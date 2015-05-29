@@ -10,13 +10,30 @@ test_that("allActivity works", {
     days = fromJSON('{"2015-01-01":{"org.mozilla.appSessions.previous":null}}')
     expect_equal(allActivity(days), NULL)
 
-    ## Simple correct values.
+    ## Simple valid record.
     days = fromJSON(file="data/valid_activity.json")
     result = list("2015-01-01"=list(totalsec = c(100, 200, 300, 400, 60),
                                     activesec = c(50, 100, 150, 200, 30)),
 		  "2015-01-02"=list(totalsec = 100, activesec = 50))
     expect_equal(allActivity(days), result)
 
+    ## Now test all the error detection statements by adding triggering
+    ## values one by one and expecting them to be discarded.
+    days = list("2015-01-02"=days$"2015-01-02")
+    result = list("2015-01-02"=list(totalsec = 100, activesec = 50))
+    expect_equal(allActivity(days), result)
+
+    days$"2015-01-03" <- list(purpose="Empty day does not change results")
+    expect_equal(allActivity(days), result)
+
+    days$"2015-01-04" <- list(
+        purpose = "Days with differing time/tick lengths are discarded",
+        org.mozilla.appSessions.previous = list(
+            cleanTotalTime=c(10, 20),
+            cleanActiveTicks=c(1)
+        )
+    )
+    expect_equal(allActivity(days), result)
 })
 
 ## Add Date objects

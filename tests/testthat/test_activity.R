@@ -34,6 +34,17 @@ test_that("allActivity works", {
         )
     )
     expect_equal(allActivity(days), result)
+    expect_equal(length(allActivity(days)), 1)
+
+    two_ticks = c(1, 2)
+    # Fix the length mismatch ...
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks <- two_ticks
+    expect_equal(length(allActivity(days)), 2)
+
+    # ... now break the values in a couple ways
+    has_na = c(1, '')
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks = has_na
+    expect_equal(allActivity(days)$"2015-01-04"$activesec, 5)
 })
 
 ## Add Date objects

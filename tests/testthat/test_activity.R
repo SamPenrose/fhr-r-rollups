@@ -36,15 +36,34 @@ test_that("allActivity works", {
     expect_equal(allActivity(days), result)
     expect_equal(length(allActivity(days)), 1)
 
-    two_ticks = c(1, 2)
-    # Fix the length mismatch ...
+    two_ticks = c(0, 0)
+    # Fix the length mismatch, also testing 0 is a valid ticks value ...
     days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks <- two_ticks
-    expect_equal(length(allActivity(days)), 2)
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, c(10, 20))
 
-    # ... now break the values in a couple ways
+    # ... now break the tick values in a couple ways, which tests both value
+    # detection and that we strip out the corresponding time value.
     has_na = c(1, '')
     days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks = has_na
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, 10)
     expect_equal(allActivity(days)$"2015-01-04"$activesec, 5)
+    too_big = c(3110401, 2)
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks = too_big
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, 20)
+    expect_equal(allActivity(days)$"2015-01-04"$activesec, 10)
+    too_small = c(1, -2)
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks = too_small
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, 10)
+    expect_equal(allActivity(days)$"2015-01-04"$activesec, 5)
+
+    # time values must be > 0 and < 15552000
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanActiveTicks <- two_ticks
+    zero_time = c(0, 20)
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanTotalTime = zero_time
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, 20)
+    big_time = c(10, 15552000+1)
+    days$"2015-01-04"$org.mozilla.appSessions.previous$cleanTotalTime = big_time
+    expect_equal(allActivity(days)$"2015-01-04"$totalsec, 10)
 })
 
 ## Add Date objects

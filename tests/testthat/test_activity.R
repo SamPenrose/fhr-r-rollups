@@ -2,7 +2,7 @@ source("../../lib/activity.R")
 library(rjson)
 
 test_that("allActivity works", {
-    ## Simple garbage values.
+    ## Simple garbage values return NULL.
     days = fromJSON("{}")
     expect_equal(allActivity(days), NULL)
     days = fromJSON('{"2015-01-01":null}')
@@ -64,6 +64,35 @@ test_that("allActivity works", {
     big_time = c(10, 15552000+1)
     days$"2015-01-04"$org.mozilla.appSessions.previous$cleanTotalTime = big_time
     expect_equal(allActivity(days)$"2015-01-04"$totalsec, 10)
+})
+
+test_that("areDatesInPeriod works", {
+  dates = c("2014-12-31", "2015-01-01", "2016-02-26")
+  illegal_bound = dates
+  expect_error(areDatesInPeriod(dates, illegal_from, NULL))
+  # garbage dates accepted depending on interaction of wacky date
+  # inequality testing and which bounds we define
+  # XXX we can fix this by calling as.Date on the inputs
+  expect_equal(areDatesInPeriod(c(""), to=dates[1]), c(TRUE))
+  expect_equal(areDatesInPeriod(c("dasdasdasasd"), dates[1]), c(TRUE))
+  # No plausible value exclusions
+  expect_equal(areDatesInPeriod(c("9999-12-31"), c("0001-01-01")), c(TRUE))
+  expect_equal(areDatesInPeriod(c("0001-01-01"), NULL, c("9999-12-31")),
+               c(TRUE))
+
+  expect_error(areDatesInPeriod(dates, NULL, illegal_from))
+  # inclusive from (== middle to exclude start)
+  expect_equal(areDatesInPeriod(dates, dates[2]), c(FALSE, TRUE, TRUE))
+  # inclusive to (== middle to exclude end)
+  expect_equal(areDatesInPeriod(dates, NULL, dates[2]), c(TRUE, TRUE, FALSE))
+
+})
+
+test_that("is.active.in.month works", {
+  r = list(data=list(days=fromJSON(file="data/valid_activity.json")))
+  expect_equal(is.active.in.month(r, "2015-01-01"), TRUE)
+  expect_equal(is.active.in.month(r, "2015-02-01"), FALSE)
+  expect_equal(is.active.in.month(r, ""), NA)
 })
 
 test_that("last.month.day works", {
